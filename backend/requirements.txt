@@ -1,0 +1,10 @@
+fastapi==0.115.*
+uvicorn[standard]==0.30.*
+sqlalchemy
+psycopg2-binary
+pydantic-settings
+python-dotenv
+pyjwt
+passlib[bcrypt]
+pytest
+httpx
