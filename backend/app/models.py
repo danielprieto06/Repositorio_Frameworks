@@ -13,8 +13,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-
-
+    role = Column(String, nullable=False, default="user", server_default="user")
 # Modelo de ejercicios
 class Exercise(Base):
     __tablename__ = "exercises"

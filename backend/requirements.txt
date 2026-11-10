@@ -1,10 +1,11 @@
-fastapi==0.115.*
-uvicorn[standard]==0.30.*
-sqlalchemy
+fastapi==0.115.14
+uvicorn[standard]==0.30.6
+SQLAlchemy==2.1.8
 psycopg2-binary
-pydantic-settings
+pydantic-settings==2.16.2
 python-dotenv
-pyjwt
-passlib[bcrypt]
+PyJWT==2.15.1
+email-validator==2.3.0
+alembic==1.20.1
 pytest
 httpx
