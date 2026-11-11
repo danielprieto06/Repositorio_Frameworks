@@ -1,7 +1,13 @@
 
-from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
+from typing import Literal
 
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+# ==============================
+# USUARIOS Y AUTENTICACIÓN
+# ==============================
 
 # Esquema para iniciar sesión
 class UserLogin(BaseModel):
@@ -24,13 +30,22 @@ class UserCreate(BaseModel):
 
 # Esquema para mostrar un usuario
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     username: str
     email: EmailStr
+    role: str
 
-    class Config:
-        from_attributes = True
 
+# Esquema para modificar el rol de un usuario
+class UserRoleUpdate(BaseModel):
+    role: Literal["user", "admin"]
+
+
+# ==============================
+# EJERCICIOS
+# ==============================
 
 # Esquema para crear un ejercicio
 class ExerciseCreate(BaseModel):
@@ -41,14 +56,17 @@ class ExerciseCreate(BaseModel):
 
 # Esquema para mostrar un ejercicio
 class ExerciseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     description: str
     muscle_group: str
 
-    class Config:
-        from_attributes = True
 
+# ==============================
+# ENTRENAMIENTOS
+# ==============================
 
 # Esquema para crear un entrenamiento
 class WorkoutCreate(BaseModel):
@@ -58,14 +76,17 @@ class WorkoutCreate(BaseModel):
 
 # Esquema para mostrar un entrenamiento
 class WorkoutResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     description: str
     user_id: int
 
-    class Config:
-        from_attributes = True
 
+# ==============================
+# ALIMENTOS
+# ==============================
 
 # Esquema para crear un alimento
 class FoodCreate(BaseModel):
@@ -78,6 +99,8 @@ class FoodCreate(BaseModel):
 
 # Esquema para mostrar un alimento
 class FoodResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     calories: float
@@ -85,9 +108,10 @@ class FoodResponse(BaseModel):
     carbohydrates: float
     fats: float
 
-    class Config:
-        from_attributes = True
 
+# ==============================
+# ALIMENTOS CONSUMIDOS
+# ==============================
 
 # Esquema para registrar un alimento consumido
 class FoodEntryCreate(BaseModel):
@@ -97,15 +121,18 @@ class FoodEntryCreate(BaseModel):
 
 # Esquema para mostrar un alimento consumido
 class FoodEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     food_id: int
     quantity_g: float
     calories_total: float
 
-    class Config:
-        from_attributes = True
 
+# ==============================
+# PROGRESO FÍSICO
+# ==============================
 
 # Esquema para registrar el progreso físico
 class ProgressCreate(BaseModel):
@@ -115,11 +142,10 @@ class ProgressCreate(BaseModel):
 
 # Esquema para mostrar el progreso físico
 class ProgressResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     weight: float
     height: float
     created_at: datetime
     user_id: int
-
-    class Config:
-        from_attributes = True

@@ -9,8 +9,10 @@ from app.security import (
     hash_password,
     verify_password,
     create_access_token,
-    get_current_user
+    get_current_user,
+    require_admin
 )
+
 
 router = APIRouter(
     prefix="/users",
@@ -18,7 +20,10 @@ router = APIRouter(
 )
 
 
-# Consultar el perfil del usuario autenticado
+# ==============================
+# CONSULTAR PERFIL
+# ==============================
+
 @router.get("/me", response_model=schemas.UserResponse)
 def consultar_perfil(
     usuario_actual: str = Depends(get_current_user),
@@ -35,7 +40,10 @@ def consultar_perfil(
     return usuario
 
 
-# Registrar un usuario
+# ==============================
+# REGISTRAR USUARIO
+# ==============================
+
 @router.post(
     "/",
     response_model=schemas.UserResponse,
@@ -45,7 +53,6 @@ def registrar_usuario(
     usuario: schemas.UserCreate,
     db: Session = Depends(get_db)
 ):
-    # Comprobar si el nombre de usuario ya existe
     usuario_existente = db.query(models.User).filter(
         models.User.username == usuario.username
     ).first()
@@ -56,7 +63,6 @@ def registrar_usuario(
             detail="El nombre de usuario ya está registrado"
         )
 
-    # Comprobar si el correo ya existe
     email_existente = db.query(models.User).filter(
         models.User.email == usuario.email
     ).first()
@@ -89,7 +95,10 @@ def registrar_usuario(
     return nuevo_usuario
 
 
-# Iniciar sesión
+# ==============================
+# INICIAR SESIÓN
+# ==============================
+
 @router.post("/login", response_model=schemas.Token)
 def iniciar_sesion(
     datos: schemas.UserLogin,
@@ -122,3 +131,63 @@ def iniciar_sesion(
         "access_token": token,
         "token_type": "bearer"
     }
+
+
+# ==============================
+# ADMINISTRACIÓN DE USUARIOS
+# ==============================
+
+# Listar todos los usuarios
+@router.get(
+    "/admin/users",
+    response_model=list[schemas.UserResponse]
+)
+def listar_usuarios(
+    administrador: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    usuarios = db.query(models.User).order_by(
+        models.User.id
+    ).all()
+
+    return usuarios
+
+
+# Cambiar el rol de un usuario
+@router.patch(
+    "/admin/users/{user_id}/role",
+    response_model=schemas.UserResponse
+)
+def cambiar_rol_usuario(
+    user_id: int,
+    datos: schemas.UserRoleUpdate,
+    administrador: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    usuario = db.get(models.User, user_id)
+
+    if usuario is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+
+    # No permitir retirar el último administrador
+    if usuario.role == "admin" and datos.role == "user":
+
+        total_administradores = db.query(models.User).filter(
+            models.User.role == "admin"
+        ).count()
+
+        if total_administradores <= 1:
+            raise HTTPException(
+                status_code=409,
+                detail="No se puede quitar el rol al último administrador"
+            )
+
+    usuario.role = datos.role
+
+    db.commit()
+    db.refresh(usuario)
+
+    return usuario

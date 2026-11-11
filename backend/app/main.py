@@ -1,3 +1,4 @@
+
 import time
 
 from fastapi import FastAPI, Request
@@ -7,7 +8,14 @@ from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
-from app.routers import users, exercises, workouts, foods, food_entries, progress
+from app.routers import (
+    users,
+    exercises,
+    workouts,
+    foods,
+    food_entries,
+    progress,
+)
 
 
 app = FastAPI(title="FitLife API")
@@ -18,7 +26,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -53,17 +61,20 @@ async def medir_tiempo_peticion(request: Request, call_next):
 @app.exception_handler(IntegrityError)
 async def manejar_error_integridad(
     request: Request,
-    exc: IntegrityError
+    exc: IntegrityError,
 ):
     return JSONResponse(
         status_code=409,
         content={
-            "detail": "Conflicto con los datos existentes en la base de datos."
+            "detail": (
+                "Conflicto con los datos existentes "
+                "en la base de datos."
+            )
         },
     )
 
 
-# Rutas de la API
+# 5. Registro de las rutas de la API
 app.include_router(users.router)
 app.include_router(exercises.router)
 app.include_router(workouts.router)
@@ -72,6 +83,9 @@ app.include_router(food_entries.router)
 app.include_router(progress.router)
 
 
+# 6. Ruta principal
 @app.get("/")
 def inicio():
-    return {"mensaje": "Bienvenido a FitLife"}
+    return {
+        "mensaje": "Bienvenido a FitLife"
+    }
